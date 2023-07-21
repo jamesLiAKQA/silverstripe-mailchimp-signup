@@ -469,8 +469,11 @@ class SignupControllerExtension extends Extension
             // Store the submitted data in case the user needs to try again
             $session->set('FormInfo.' . $form->FormName() . '.data', $data);
 
-            // add error message
-            $form->sessionMessage($result['message'], $result['type']);
+            if ($this->getOwner()->hasMethod('handleErrorMessage')) {
+                $this->getOwner()->handleErrorMessage($form,$result);
+            }else{
+                $form->sessionMessage($result['message'], $result['type']);
+            }
 
             // redirect back
             if ($this->getOwner()->hasMethod('getErrorLink')) {
@@ -644,6 +647,7 @@ class SignupControllerExtension extends Extension
                 Injector::inst()->get(LoggerInterface::class)->warning('Last Error: ' . print_r($mailChimp->getLastError(), true));
                 Injector::inst()->get(LoggerInterface::class)->warning('Last Request: ' . print_r($mailChimp->getLastRequest(), true));
                 Injector::inst()->get(LoggerInterface::class)->warning('Last Response: ' . print_r($mailChimp->getLastResponse(), true));
+                $returnData['error'] = $mailChimp->getLastError();
             }
         }
 
